@@ -25,15 +25,6 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      # Condition to only run this whenever the runner os is Mac
-      - name: Build Release Mac
-        if: matrix.os == 'macos-latest'
-        run: |
-          strip target/release/test_gh_actions
-          mkdir -p release
-          tar -C ./target/release/ -czvf ./release/test_gh_actions-mac.tar.gz ./test_gh_actions
-
-      # Condition to only run this whenever the runner os is Ubuntu
       - name: Build Release Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -43,14 +34,20 @@ jobs:
           mkdir -p release
           mv target/debian/*.deb ./release/test_gh_actions-linux.deb
           tar -C ./target/release/ -czvf ./release/test_gh_actions-linux.tar.gz ./test_gh_actions
+  
+      - run: echo "TAG=$(date --iso -u)" >> $GITHUB_ENV
+        if: github.ref == 'refs/heads/release'
+      - run: echo "TAG=nightly" >> $GITHUB_ENV
+        if: github.ref != 'refs/heads/release'
+      - run: 'echo "TAG: $TAG"'
 
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ env.tag }}
+          release_name: Release ${{ env.tag }}
           draft: true
           files: |
             ./release/*.tar.gz
