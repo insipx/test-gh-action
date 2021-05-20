@@ -29,9 +29,9 @@ jobs:
       - name: Build Release Mac
         if: matrix.os == 'macos-latest'
         run: |
-          strip target/release/aow
+          strip target/release/test_gh_actions
           mkdir -p release
-          tar -C ./target/release/ -czvf ./release/aow-mac.tar.gz ./aow
+          tar -C ./target/release/ -czvf ./release/test_gh_actions-mac.tar.gz ./test_gh_actions
 
       # Condition to only run this whenever the runner os is Ubuntu
       - name: Build Release Linux
@@ -39,10 +39,10 @@ jobs:
         run: |
           cargo install cargo-deb
           cargo deb
-          strip target/release/aow
+          strip target/release/test_gh_actions
           mkdir -p release
-          mv target/debian/*.deb ./release/aow-linux.deb
-          tar -C ./target/release/ -czvf ./release/aow-linux.tar.gz ./aow
+          mv target/debian/*.deb ./release/test_gh_actions-linux.deb
+          tar -C ./target/release/ -czvf ./release/test_gh_actions-linux.tar.gz ./test_gh_actions
 
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
@@ -54,7 +54,6 @@ jobs:
           draft: true
           files: |
             ./release/*.tar.gz
-            ./release/*.zip
             ./release/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
