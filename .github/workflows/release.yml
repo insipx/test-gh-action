@@ -34,20 +34,21 @@ jobs:
           mkdir -p release
           mv target/debian/*.deb ./release/test_gh_actions-linux.deb
           tar -C ./target/release/ -czvf ./release/test_gh_actions-linux.tar.gz ./test_gh_actions
-  
-      - run: echo "TAG=$(date --iso -u)" >> $GITHUB_ENV
-        if: github.ref == 'refs/heads/release'
-      - run: echo "TAG=nightly" >> $GITHUB_ENV
-        if: github.ref != 'refs/heads/release'
-      - run: 'echo "TAG: $TAG"'
-
+      
+      - name: Get changelog
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_depth: 2
+          path: ./CHANGELOG.md
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.tag }}
-          release_name: Release ${{ env.tag }}
+          tag_name: ${{ steps.changelog_reader.outputs.version }}
+          release_name: Release ${{ steps.changelog_reader.outputs.version }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
           draft: true
           files: |
             ./release/*.tar.gz
