@@ -1,8 +1,8 @@
 name: Release CI
 on:
   push:
-  branches:
-    - release
+    branches:
+      - release
 jobs:
   deploy:
     # A strategy is used to define various build environments this job will run.
